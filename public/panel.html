@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Guardião</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Poppins', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Painel do Guardião</h1>
+
+        <!-- Formulário para Trocar Senha (visível apenas no primeiro login) -->
+        <div id="change-password-section" class="hidden">
+            <h2 class="text-xl font-semibold text-center mb-4">Troque sua Senha</h2>
+            <p class="text-center text-sm mb-4">Por segurança, defina uma nova senha para continuar.</p>
+            <form id="change-password-form">
+                <div class="mb-4">
+                    <label for="newPassword" class="block text-gray-700 font-bold mb-2">Nova Senha</label>
+                    <input type="password" id="newPassword" class="w-full px-3 py-2 border rounded-lg" required>
+                </div>
+                <button type="submit" class="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Salvar Nova Senha</button>
+            </form>
+        </div>
+
+        <!-- Formulário para Definir o Resultado (visível após trocar a senha) -->
+        <div id="set-result-section" class="hidden">
+            <h2 class="text-xl font-semibold text-center mb-4">Qual é o segredo?</h2>
+            <form id="set-result-form">
+                <div class="flex justify-center gap-4 mb-6">
+                    <input type="radio" id="boy" name="result" value="boy" class="hidden peer/boy" required><label for="boy" class="w-32 text-center p-4 rounded-lg border-2 cursor-pointer peer-checked/boy:bg-blue-500 peer-checked/boy:text-white">Menino 💙</label>
+                    <input type="radio" id="girl" name="result" value="girl" class="hidden peer/girl"><label for="girl" class="w-32 text-center p-4 rounded-lg border-2 cursor-pointer peer-checked/girl:bg-pink-400 peer-checked/girl:text-white">Menina ❤️</label>
+                </div>
+                <button type="submit" class="w-full bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg">Guardar o Segredo</button>
+            </form>
+        </div>
+
+        <div id="feedback" class="mt-4 text-center font-bold"></div>
+    </div>
+
+    <script>
+        const feedback = document.getElementById('feedback');
+        const changePasswordSection = document.getElementById('change-password-section');
+        const setResultSection = document.getElementById('set-result-section');
+
+        // Verifica se o usuário está "logado" e se é o primeiro acesso
+        window.onload = () => {
+            const token = localStorage.getItem('admin-token');
+            if (!token) {
+                // CORREÇÃO: Removido o "/" inicial para criar um caminho relativo
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('first') === 'true') {
+                changePasswordSection.classList.remove('hidden');
+            } else {
+                setResultSection.classList.remove('hidden');
+            }
+        };
+        
+        // Lógica para trocar a senha
+        document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+            try {
+                const response = await fetch('/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newPassword })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    feedback.textContent = 'Senha alterada! Redirecionando...';
+                    feedback.className = 'mt-4 text-center font-bold text-green-500';
+                    // CORREÇÃO: Removido o "/" inicial para criar um caminho relativo
+                    setTimeout(() => window.location.href = 'panel.html', 2000);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                feedback.textContent = 'Erro ao alterar senha.';
+                feedback.className = 'mt-4 text-center font-bold text-red-500';
+            }
+        });
+
+        // Lógica para definir o resultado
+        document.getElementById('set-result-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultValue = document.querySelector('input[name="result"]:checked').value;
+            try {
+                const response = await fetch('/set-result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ result: resultValue })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    feedback.textContent = 'O segredo está guardado com sucesso!';
+                    feedback.className = 'mt-4 text-center font-bold text-green-500';
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                feedback.textContent = 'Erro ao guardar o segredo.';
+                feedback.className = 'mt-4 text-center font-bold text-red-500';
+            }
+        });
+    </script>
+</body>
+</html>
