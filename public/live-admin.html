@@ -88,7 +88,7 @@
         });
 
         function initializeWebSocket() {
-            ws = new WebSocket(`ws://${window.location.host}`);
+            const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`);
 
             ws.onopen = () => {
                 ws.send(JSON.stringify({ type: 'broadcaster' }));
