@@ -17,108 +17,116 @@ const activeChatUsers = new Set();
 let broadcaster = null;
 const watchers = new Map();
 
-wss.on('connection', ws => {
-    const id = crypto.randomUUID();
-    ws.id = id;
-    console.log(`Cliente WebSocket conectado com ID: ${id}`);
-    
-    ws.on('message', message => {
-        let parsedMessage;
-        try { parsedMessage = JSON.parse(message); } 
-        catch (e) { return console.error("Mensagem inválida:", message); }
+wss.on('connection', (ws) => {
+  ws.id = crypto.randomUUID();
+  console.log(`Cliente conectado: ${ws.id}`);
 
-        switch (parsedMessage.type) {
-            case 'broadcaster':
-                broadcaster = ws;
-                console.log(`Transmissor definido com ID: ${ws.id}`);
-                // **CORREÇÃO**: Notifica o novo transmissor sobre todos os espectadores já existentes.
-                watchers.forEach((watcherWs, watcherId) => {
-                    console.log(`Notificando transmissor sobre espectador existente: ${watcherId}`);
-                    broadcaster.send(JSON.stringify({ type: 'watcher', id: watcherId }));
-                });
-                break;
-            case 'watcher':
-                watchers.set(ws.id, ws);
-                console.log(`Espectador [${ws.id}] registrado. Notificando transmissor se estiver ativo.`);
-                // Notifica o transmissor (se ele já estiver conectado).
-                if (broadcaster) {
-                    broadcaster.send(JSON.stringify({ type: 'watcher', id: ws.id }));
-                }
-                break;
-            case 'offer':
-                const watcherToOffer = watchers.get(parsedMessage.toId);
-                if (watcherToOffer) {
-                    // Repassa a oferta do transmissor para o espectador específico.
-                    watcherToOffer.send(JSON.stringify({ type: 'offer', sdp: parsedMessage.sdp, fromId: ws.id }));
-                }
-                break;
-            case 'answer':
-                // Repassa a resposta do espectador para o transmissor.
-                if (broadcaster) {
-                    broadcaster.send(JSON.stringify({ type: 'answer', sdp: parsedMessage.sdp, fromId: ws.id }));
-                }
-                break;
-            case 'iceCandidate':
-                const targetId = parsedMessage.toId;
-                const targetIsBroadcaster = targetId === broadcaster?.id;
-                const targetWs = targetIsBroadcaster ? broadcaster : watchers.get(targetId);
-                if (targetWs) {
-                    // Repassa o ICE Candidate para o destino correto (transmissor ou espectador).
-                    targetWs.send(JSON.stringify({ type: 'iceCandidate', candidate: parsedMessage.candidate, fromId: ws.id }));
-                }
-                break;
-            case 'join':
-                const requestedName = parsedMessage.name.trim();
-                if (activeChatUsers.has(requestedName)) {
-                    ws.send(JSON.stringify({ type: 'join-error', text: 'Este nome já está em uso.' }));
-                } else if (requestedName.length < 2) {
-                    ws.send(JSON.stringify({ type: 'join-error', text: 'O nome precisa ter pelo menos 2 caracteres.' }));
-                } else {
-                    ws.username = requestedName;
-                    activeChatUsers.add(ws.username);
-                    ws.send(JSON.stringify({ type: 'join-success' }));
-                    console.log(`Usuário '${ws.username}' entrou no chat.`);
-                }
-                break;
-            case 'chat':
-                if (ws.username) {
-                    const chatMessage = { type: 'chat', sender: ws.username, text: parsedMessage.text };
-                    wss.clients.forEach(client => {
-                        if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify(chatMessage));
-                    });
-                }
-                break;
-            case 'end-live':
-                 wss.clients.forEach(client => {
-                    if (client !== ws && client.readyState === WebSocket.OPEN) client.send(JSON.stringify({ type: 'end-live' }));
-                });
-                break;
+  ws.on('message', (message) => {
+    let parsed;
+    try {
+      parsed = JSON.parse(message);
+    } catch {
+      console.error('Mensagem inválida:', message);
+      return;
+    }
+
+    switch (parsed.type) {
+      case 'broadcaster':
+        broadcaster = ws;
+        console.log(`Transmissor definido: ${ws.id}`);
+        // Notifica transmissor de watchers existentes
+        watchers.forEach((watcherWs, watcherId) => {
+          broadcaster.send(JSON.stringify({ type: 'watcher', id: watcherId }));
+        });
+        break;
+
+      case 'watcher':
+        watchers.set(ws.id, ws);
+        console.log(`Espectador registrado: ${ws.id}`);
+        if (broadcaster && broadcaster.readyState === WebSocket.OPEN) {
+          broadcaster.send(JSON.stringify({ type: 'watcher', id: ws.id }));
         }
-    });
+        break;
 
-    ws.on('close', () => {
-        console.log(`Cliente [${ws.id}] (username: ${ws.username}) desconectou.`);
-        if (ws.username) activeChatUsers.delete(ws.username);
-
-        // **MELHORIA**: Lógica de desconexão mais robusta.
-        if (ws === broadcaster) {
-            console.log('O transmissor desconectou. Encerrando a live para todos.');
-            broadcaster = null;
-            // Notifica todos os espectadores que a live acabou.
-            watchers.forEach(watcher => {
-                watcher.send(JSON.stringify({ type: 'end-live' }));
-            });
-        } else if (watchers.has(ws.id)) {
-            const watcherId = ws.id;
-            watchers.delete(watcherId);
-            console.log(`O espectador [${watcherId}] desconectou.`);
-            // Notifica o transmissor para que ele possa limpar a conexão.
-            if (broadcaster) {
-                broadcaster.send(JSON.stringify({ type: 'watcher-disconnected', id: watcherId }));
-            }
+      case 'offer': {
+        const watcherWs = watchers.get(parsed.toId);
+        if (watcherWs && watcherWs.readyState === WebSocket.OPEN) {
+          watcherWs.send(JSON.stringify({ type: 'offer', sdp: parsed.sdp, fromId: ws.id }));
         }
-    });
-    ws.on('error', error => console.error(`Erro no WebSocket [${ws.id}]:`, error));
+        break;
+      }
+
+      case 'answer':
+        if (broadcaster && broadcaster.readyState === WebSocket.OPEN) {
+          broadcaster.send(JSON.stringify({ type: 'answer', sdp: parsed.sdp, fromId: ws.id }));
+        }
+        break;
+
+      case 'iceCandidate': {
+        const targetId = parsed.toId;
+        const targetWs = targetId === broadcaster?.id ? broadcaster : watchers.get(targetId);
+        if (targetWs && targetWs.readyState === WebSocket.OPEN) {
+          targetWs.send(JSON.stringify({ type: 'iceCandidate', candidate: parsed.candidate, fromId: ws.id }));
+        }
+        break;
+      }
+
+      case 'chat':
+        if (ws.username) {
+          const chatMsg = { type: 'chat', sender: ws.username, text: parsed.text };
+          wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify(chatMsg));
+          });
+        }
+        break;
+
+      case 'join':
+        const name = parsed.name.trim();
+        if (activeChatUsers.has(name)) {
+          ws.send(JSON.stringify({ type: 'join-error', text: 'Este nome já está em uso.' }));
+        } else if (name.length < 2) {
+          ws.send(JSON.stringify({ type: 'join-error', text: 'O nome precisa ter pelo menos 2 caracteres.' }));
+        } else {
+          ws.username = name;
+          activeChatUsers.add(name);
+          ws.send(JSON.stringify({ type: 'join-success' }));
+          console.log(`Usuário entrou no chat: ${name}`);
+        }
+        break;
+
+      case 'end-live':
+        // Notifica todos que live acabou
+        wss.clients.forEach(client => {
+          if (client !== ws && client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type: 'end-live' }));
+          }
+        });
+        break;
+    }
+  });
+
+  ws.on('close', () => {
+    console.log(`Cliente desconectou: ${ws.id} (username: ${ws.username})`);
+    if (ws.username) activeChatUsers.delete(ws.username);
+
+    if (ws === broadcaster) {
+      broadcaster = null;
+      console.log('Transmissor desconectou. Encerrando live.');
+      watchers.forEach(watcher => {
+        if (watcher.readyState === WebSocket.OPEN) {
+          watcher.send(JSON.stringify({ type: 'end-live' }));
+        }
+      });
+      watchers.clear();
+    } else if (watchers.has(ws.id)) {
+      watchers.delete(ws.id);
+      if (broadcaster && broadcaster.readyState === WebSocket.OPEN) {
+        broadcaster.send(JSON.stringify({ type: 'watcher-disconnected', id: ws.id }));
+      }
+    }
+  });
+
+  ws.on('error', (err) => console.error(`Erro WS [${ws.id}]:`, err));
 });
 
 // O resto do seu código permanece igual...
