@@ -12,36 +12,58 @@
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #FFF8F0; }
         .font-dancing { font-family: 'Dancing Script', cursive; }
-        .timer-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .timer-box, .live-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); transition: all 0.5s ease-in-out; }
         .reveal-container { transition: opacity 1s ease-in-out; }
         .content-blur { filter: blur(8px); transition: filter 1s ease-in-out; }
-        /* Estilos da nova enquete */
-        .boy-color { background-color: #90cdf4; } /* Azul bebê */
-        .girl-color { background-color: #fbb6ce; } /* Rosa bebê */
+        .boy-color { background-color: #90cdf4; }
+        .girl-color { background-color: #fbb6ce; }
         .transition-width { transition: width 0.7s cubic-bezier(0.25, 1, 0.5, 1); }
-        /* Estilos do Carrossel */
         .tns-nav { text-align: center; margin-top: 1rem; }
         .tns-nav button { width: 10px; height: 10px; background-color: #ccc; border-radius: 50%; border: none; padding: 0; margin: 0 5px; }
         .tns-nav button.tns-nav-active { background-color: #90cdf4; }
         .message-card { background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+        .chat-message strong { font-family: 'Dancing Script', cursive; font-size: 1.25rem; }
     </style>
 </head>
 <body class="text-gray-700">
     
     <div id="main-content">
         <section class="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-100 to-pink-100">
-            <div class="text-center">
+            <div class="text-center mb-10">
                 <h1 class="font-dancing text-6xl md:text-8xl text-gray-800">Nosso Doce Mistério</h1>
                 <p class="mt-4 text-lg md:text-2xl text-gray-600">A nossa doce espera está quase no fim!</p>
             </div>
-            <div class="mt-10">
-                <div id="countdown-container" class="timer-box p-6 md:p-10 rounded-2xl shadow-2xl max-w-3xl mx-auto">
-                    <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">Contagem regressiva 🍼</h2>
-                    <div id="timer" class="grid grid-cols-4 gap-3 md:gap-5 text-center">
-                        <div><div id="days" class="text-4xl md:text-6xl font-bold text-pink-400">00</div><div class="text-sm md:text-base text-gray-500">Dias</div></div>
-                        <div><div id="hours" class="text-4xl md:text-6xl font-bold text-blue-400">00</div><div class="text-sm md:text-base text-gray-500">Horas</div></div>
-                        <div><div id="minutes" class="text-4xl md:text-6xl font-bold text-pink-400">00</div><div class="text-sm md:text-base text-gray-500">Minutos</div></div>
-                        <div><div id="seconds" class="text-4xl md:text-6xl font-bold text-blue-400">00</div><div class="text-sm md:text-base text-gray-500">Segundos</div></div>
+            
+            <div id="top-section-container" class="w-full max-w-6xl flex justify-center flex-wrap gap-8 items-start">
+                <div id="countdown-wrapper" class="timer-box p-6 md:p-10 rounded-2xl shadow-2xl w-full max-w-xl lg:w-auto lg:flex-1">
+                    <div id="countdown-container">
+                        <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">Contagem regressiva 🍼</h2>
+                        <div id="timer" class="grid grid-cols-4 gap-3 md:gap-5 text-center">
+                            <div><div id="days" class="text-4xl md:text-6xl font-bold text-pink-400">00</div><div class="text-sm md:text-base text-gray-500">Dias</div></div>
+                            <div><div id="hours" class="text-4xl md:text-6xl font-bold text-blue-400">00</div><div class="text-sm md:text-base text-gray-500">Horas</div></div>
+                            <div><div id="minutes" class="text-4xl md:text-6xl font-bold text-pink-400">00</div><div class="text-sm md:text-base text-gray-500">Minutos</div></div>
+                            <div><div id="seconds" class="text-4xl md:text-6xl font-bold text-blue-400">00</div><div class="text-sm md:text-base text-gray-500">Segundos</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="live-stream-container" class="live-box p-6 rounded-2xl shadow-2xl w-full max-w-xl lg:w-auto lg:flex-1 hidden">
+                    <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">A nossa reação AO VIVO! 🎥</h2>
+                    <div class="relative w-full bg-black rounded-lg">
+                        <video id="remoteVideo" autoplay playsinline class="w-full rounded-lg"></video>
+                        <div id="live-status" class="absolute top-2 left-2 bg-yellow-500 text-white text-sm font-bold px-2 py-1 rounded">● A AGUARDAR...</div>
+                    </div>
+                    <div class="mt-4">
+                        <div id="live-chat-box" class="h-32 bg-gray-100 rounded p-2 overflow-y-auto mb-2 border border-gray-300"></div>
+                        <form id="join-chat-form" class="flex gap-2">
+                            <input type="text" id="chat-name" placeholder="Digite seu nome para entrar..." class="flex-grow px-2 py-1 border rounded" required>
+                            <button type="submit" class="bg-gray-500 text-white px-4 rounded hover:bg-gray-600">Entrar</button>
+                        </form>
+                        <p id="chat-error" class="text-red-500 text-xs text-center mt-1"></p>
+                        <form id="live-chat-form" class="flex gap-2 hidden">
+                            <input type="text" id="chat-message" placeholder="Escreva uma mensagem..." class="flex-grow px-2 py-1 border rounded" required>
+                            <button type="submit" class="bg-gray-700 text-white px-4 rounded hover:bg-gray-800">Enviar</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -51,99 +73,49 @@
             <div class="max-w-4xl mx-auto text-center">
                 <h2 class="font-dancing text-5xl text-pink-400 mb-12">Nossa Jornada de Amor</h2>
                 <div class="grid md:grid-cols-2 gap-10 text-left">
-                    <div class="bg-blue-50 p-8 rounded-2xl shadow-lg"><h3 class="text-2xl font-bold text-blue-500 mb-4">A Chegada da Liz</h3><p class="text-gray-600 leading-relaxed">A chegada da Liz foi rápida e avassaladora. Ela conquistou nossos corações no instante em que veio ao mundo. Com ela, aprendemos, crescemos e descobrimos um amor que não sabíamos que existia.Liz foi o nosso primeiro grande amor — e agora, com o coração transbordando, nos preparamos para viver tudo isso novamente. Porque o amor não se divide… ele se multiplica.</p></div>
-                    <div class="bg-pink-50 p-8 rounded-2xl shadow-lg"><h3 class="text-2xl font-bold text-pink-500 mb-4">E a Aventura Continua...</h3><p class="text-gray-600 leading-relaxed">Estamos prestes a viver, mais uma vez, o milagre da vida. A espera, os sonhos, os planos… tudo retorna com uma nova força, um novo brilho. Ser pai novamente é sentir o amor se multiplicar antes mesmo de ver o rostinho. É entender que, mesmo já conhecendo o caminho, cada passo será único.</p></div>
+                    <div class="bg-blue-50 p-8 rounded-2xl shadow-lg"><h3 class="text-2xl font-bold text-blue-500 mb-4">A Chegada da Alice</h3><p class="text-gray-600 leading-relaxed">A nossa jornada como pais começou com a chegada da nossa pequena Alice, que transformou nosso mundo e encheu nossos dias com risadas e um amor sem fim.</p></div>
+                    <div class="bg-pink-50 p-8 rounded-2xl shadow-lg"><h3 class="text-2xl font-bold text-pink-500 mb-4">E a Aventura Continua...</h3><p class="text-gray-600 leading-relaxed">Agora, nossos corações transbordam novamente com a notícia de que a família vai crescer! Uma nova luz está a caminho para se juntar à Alice e a nós.</p></div>
                 </div>
             </div>
         </section>
-        
         <div class="w-24 h-1 bg-pink-200 mx-auto my-16 rounded-full"></div>
-
         <section id="poll" class="my-16 container mx-auto p-6 md:p-12">
             <h2 class="font-dancing text-5xl text-center text-blue-400 mb-8">Faça sua Aposta!</h2>
             <div class="grid md:grid-cols-2 gap-12 items-start">
                 <div class="bg-white p-8 rounded-xl shadow-lg">
                     <h3 class="text-2xl font-semibold mb-6 text-center">Deixe seu carinho e seu palpite!</h3>
                     <form id="guest-form" class="space-y-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Seu Nome</label>
-                            <input type="text" id="name" name="name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-pink-400 focus:border-pink-400">
-                        </div>
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700">Seu E-mail</label>
-                            <input type="email" id="email" name="email" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-pink-400 focus:border-pink-400">
-                        </div>
-                        <div>
-                            <label for="message" class="block text-sm font-medium text-gray-700">Sua Mensagem de Carinho</p>
-                            <textarea id="message" name="message" rows="4" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-400 focus:border-blue-400"></textarea>
-                        </div>
-                        <fieldset>
-                            <legend class="text-sm font-medium text-gray-700 mb-2">Seu palpite é...</legend>
-                            <div class="flex gap-4">
-                                <label for="boy" class="flex-1 text-center p-4 border-2 border-blue-300 rounded-lg cursor-pointer has-[:checked]:bg-blue-100 has-[:checked]:border-blue-500 transition-all">
-                                    <input type="radio" id="boy" name="gender" value="boy" class="sr-only" required>
-                                    <span class="text-4xl">👦</span>
-                                    <p class="font-semibold">Menino</p>
-                                </label>
-                                <label for="girl" class="flex-1 text-center p-4 border-2 border-pink-300 rounded-lg cursor-pointer has-[:checked]:bg-pink-100 has-[:checked]:border-pink-500 transition-all">
-                                    <input type="radio" id="girl" name="gender" value="girl" class="sr-only">
-                                    <span class="text-4xl">👧</span>
-                                    <p class="font-semibold">Menina</p>
-                                </label>
-                            </div>
-                        </fieldset>
+                        <div><label for="name" class="block text-sm font-medium text-gray-700">Seu Nome</label><input type="text" id="name" name="name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-pink-400 focus:border-pink-400"></div>
+                        <div><label for="email" class="block text-sm font-medium text-gray-700">Seu E-mail</label><input type="email" id="email" name="email" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-pink-400 focus:border-pink-400"></div>
+                        <div><label for="message" class="block text-sm font-medium text-gray-700">Sua Mensagem de Carinho</p><textarea id="message" name="message" rows="4" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-400 focus:border-blue-400"></textarea></div>
+                        <fieldset><legend class="text-sm font-medium text-gray-700 mb-2">Seu palpite é...</legend><div class="flex gap-4"><label for="boy" class="flex-1 text-center p-4 border-2 border-blue-300 rounded-lg cursor-pointer has-[:checked]:bg-blue-100 has-[:checked]:border-blue-500 transition-all"><input type="radio" id="boy" name="gender" value="boy" class="sr-only" required><span class="text-4xl">👦</span><p class="font-semibold">Menino</p></label><label for="girl" class="flex-1 text-center p-4 border-2 border-pink-300 rounded-lg cursor-pointer has-[:checked]:bg-pink-100 has-[:checked]:border-pink-500 transition-all"><input type="radio" id="girl" name="gender" value="girl" class="sr-only"><span class="text-4xl">👧</span><p class="font-semibold">Menina</p></label></div></fieldset>
                         <button type="submit" class="w-full bg-gradient-to-r from-blue-400 to-pink-400 text-white font-bold py-3 px-4 rounded-md hover:from-blue-500 hover:to-pink-500 transition-all duration-300 shadow-lg">Enviar Participação</button>
                     </form>
                     <div id="form-feedback" class="mt-4 text-center font-bold"></div>
                 </div>
-
                 <div class="bg-white p-8 rounded-xl shadow-lg">
                     <h3 class="text-2xl font-semibold mb-6 text-center">Resultados da Enquete</h3>
                     <div class="space-y-6">
-                        <div>
-                            <div class="flex items-center gap-4">
-                                <span class="font-semibold w-20">Menino</span>
-                                <div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                                    <div id="boy-bar" class="boy-color h-8 rounded-full flex items-center justify-end pr-2 text-white font-bold transition-width" style="width: 0%;">
-                                        <span id="boy-percentage">0%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="text-right text-sm text-gray-600 mt-1">Total de votos: <span id="boy-votes">0</span></p>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-4">
-                                <span class="font-semibold w-20">Menina</span>
-                                <div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-                                    <div id="girl-bar" class="girl-color h-8 rounded-full flex items-center justify-end pr-2 text-white font-bold transition-width" style="width: 0%;">
-                                        <span id="girl-percentage">0%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="text-right text-sm text-gray-600 mt-1">Total de votos: <span id="girl-votes">0</span></p>
-                        </div>
+                        <div><div class="flex items-center gap-4"><span class="font-semibold w-20">Menino</span><div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden"><div id="boy-bar" class="boy-color h-8 rounded-full flex items-center justify-end pr-2 text-white font-bold transition-width" style="width: 0%;"><span id="boy-percentage">0%</span></div></div></div><p class="text-right text-sm text-gray-600 mt-1">Total de votos: <span id="boy-votes">0</span></p></div>
+                        <div><div class="flex items-center gap-4"><span class="font-semibold w-20">Menina</span><div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden"><div id="girl-bar" class="girl-color h-8 rounded-full flex items-center justify-end pr-2 text-white font-bold transition-width" style="width: 0%;"><span id="girl-percentage">0%</span></div></div></div><p class="text-right text-sm text-gray-600 mt-1">Total de votos: <span id="girl-votes">0</span></p></div>
                     </div>
                 </div>
             </div>
         </section>
-
         <div class="w-24 h-1 bg-blue-200 mx-auto my-16 rounded-full"></div>
-
         <section class="py-16 px-6">
             <div class="max-w-4xl mx-auto text-center">
                 <h2 class="font-dancing text-5xl text-pink-400 mb-12">Mural de Carinho</h2>
-                <div id="message-carousel">
-                    </div>
+                <div id="message-carousel"></div>
             </div>
         </section>
-
         <footer class="text-center py-8 bg-white mt-12">
-            <p class="font-dancing text-2xl text-gray-700">Com amor, Higor & Alyne</p>
+            <p class="font-dancing text-2xl text-gray-700">Com amor, [Seu Nome] & [Nome da Esposa]</p>
         </footer>
     </div>
 
     <div id="reveal-container" class="reveal-container fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
-        <div id="reveal-card" class="text-center p-10 rounded-2xl shadow-2xl transform scale-90 transition-transform duration-500">
+        <div id="reveal-card" class="text-center p-10 rounded-2xl shadow-2xl transform scale-90 transition-all duration-500">
             <h2 id="reveal-title" class="font-dancing text-6xl md:text-8xl"></h2>
             <p class="mt-4 text-2xl md:text-4xl font-bold">É um...</p>
             <p id="reveal-result" class="text-7xl md:text-9xl font-bold mt-2"></p>
@@ -152,18 +124,153 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.2/min/tiny-slider.js"></script>
     <script>
-        // --- FUNÇÃO DE REVELAÇÃO ---
+        const liveStreamContainer = document.getElementById('live-stream-container');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const liveStatus = document.getElementById('live-status');
+        const liveChatBox = document.getElementById('live-chat-box');
+        const joinChatForm = document.getElementById('join-chat-form');
+        const liveChatForm = document.getElementById('live-chat-form');
+        const chatNameInput = document.getElementById('chat-name');
+        const chatMessageInput = document.getElementById('chat-message');
+        const chatError = document.getElementById('chat-error');
+        
+        let peerConnection;
+        let broadcasterId; // **NOVO**: Guarda o ID do transmissor
+        let myChatName = null;
+        const ws = new WebSocket(`ws://${window.location.host}`);
+        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+        function addLiveChatMessage(sender, text) {
+            const msgEl = document.createElement('p');
+            msgEl.className = 'chat-message mb-1';
+            if (sender === myChatName) {
+                msgEl.innerHTML = `<strong class="text-teal-600">${sender} (você):</strong> ${text}`;
+            } else {
+                msgEl.innerHTML = `<strong class="text-gray-700">${sender}:</strong> ${text}`;
+            }
+            liveChatBox.appendChild(msgEl);
+            liveChatBox.scrollTop = liveChatBox.scrollHeight;
+        }
+        
+        ws.onopen = () => {
+            console.log('Conectado ao servidor como espectador.');
+            ws.send(JSON.stringify({ type: 'watcher' }));
+        };
+
+        ws.onmessage = async (event) => {
+            const message = JSON.parse(event.data);
+            
+            switch(message.type) {
+                case 'chat':
+                    addLiveChatMessage(message.sender, message.text);
+                    break;
+                case 'join-success':
+                    myChatName = chatNameInput.value.trim();
+                    joinChatForm.classList.add('hidden');
+                    liveChatForm.classList.remove('hidden');
+                    chatError.textContent = '';
+                    break;
+                case 'join-error':
+                    chatError.textContent = message.text;
+                    break;
+                case 'end-live':
+                    liveStatus.textContent = '● ENCERRADA';
+                    liveStatus.classList.replace('bg-green-500', 'bg-red-500');
+                    if (peerConnection) {
+                        peerConnection.close();
+                        peerConnection = null;
+                    }
+                    // Opcional: esconder o container após um tempo
+                    setTimeout(() => liveStreamContainer.classList.add('hidden'), 5000);
+                    break;
+                
+                // **CORREÇÃO**: Lógica de conexão completamente refeita
+                case 'offer':
+                    broadcasterId = message.fromId; // Guarda o ID do transmissor
+                    console.log(`Recebida oferta do transmissor [${broadcasterId}]`);
+
+                    // Mostra o container da live assim que a oferta chega
+                    liveStreamContainer.classList.remove('hidden');
+
+                    if (!peerConnection) {
+                        peerConnection = new RTCPeerConnection(configuration);
+
+                        peerConnection.ontrack = e => {
+                            if (remoteVideo.srcObject !== e.streams[0]) {
+                                remoteVideo.srcObject = e.streams[0];
+                                liveStatus.textContent = '● AO VIVO';
+                                liveStatus.classList.replace('bg-yellow-500', 'bg-green-500');
+                            }
+                        };
+
+                        peerConnection.onicecandidate = e => {
+                            if (e.candidate) {
+                                // Envia o ICE candidate para o transmissor, especificando o destino (toId)
+                                ws.send(JSON.stringify({ type: 'iceCandidate', candidate: e.candidate, toId: broadcasterId }));
+                            }
+                        };
+                    }
+                    
+                    try {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(message.sdp));
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        // Envia a resposta de volta para o transmissor
+                        ws.send(JSON.stringify({ type: 'answer', sdp: peerConnection.localDescription }));
+                    } catch (e) {
+                         console.error("Falha ao criar ou definir a resposta:", e);
+                    }
+                    break;
+                    
+                case 'iceCandidate':
+                     if (peerConnection && message.candidate) {
+                        try {
+                           await peerConnection.addIceCandidate(new RTCIceCandidate(message.candidate));
+                        } catch (e) {
+                           console.error('Erro ao adicionar ICE candidate recebido:', e);
+                        }
+                    }
+                    break;
+            }
+        };
+
+        ws.onclose = () => console.log("Conexão com o servidor fechada.");
+        ws.onerror = (err) => console.error("Erro no WebSocket:", err);
+
+        joinChatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = chatNameInput.value.trim();
+            if (name) {
+                ws.send(JSON.stringify({ type: 'join', name: name }));
+            }
+        });
+
+        liveChatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = chatMessageInput.value.trim();
+            if (text && myChatName) {
+                ws.send(JSON.stringify({ type: 'chat', text: text }));
+                chatMessageInput.value = '';
+            }
+        });
+
+        // --- O resto do seu JavaScript permanece o mesmo ---
+        async function startReveal() {
+            // ... (sem alterações)
+        }
+        // ... (resto do código sem alterações)
+
+        // --- O resto do seu JavaScript aqui... (sem alterações) ---
         async function startReveal() {
             const response = await fetch('/result');
             const data = await response.json();
+            if (!data) { console.log('Resultado ainda não definido.'); return; }
             const result = data.result;
-            
             const mainContent = document.getElementById('main-content');
             const revealContainer = document.getElementById('reveal-container');
             const revealCard = document.getElementById('reveal-card');
             const revealTitle = document.getElementById('reveal-title');
             const revealResult = document.getElementById('reveal-result');
-
             if (result === 'boy') {
                 revealCard.className += ' bg-blue-400 text-white';
                 revealTitle.textContent = 'Bem-vindo, nosso príncipe!';
@@ -173,16 +280,13 @@
                 revealTitle.textContent = 'Bem-vinda, nossa princesa!';
                 revealResult.innerHTML = 'MENINA 👧';
             }
-
             mainContent.classList.add('content-blur');
             revealContainer.classList.remove('opacity-0', 'pointer-events-none');
             setTimeout(() => {
                 revealCard.classList.remove('scale-90');
             }, 100);
         }
-
-        // --- CONFIGURAÇÃO DO CRONÔMETRO ---
-        const countdownDate = new Date("july 19, 2025 19:30:00").getTime();
+        const countdownDate = new Date("July 20, 2025 18:00:00").getTime(); // Lembre-se de ajustar esta data!
         const timerInterval = setInterval(() => {
             const now = new Date().getTime();
             const distance = countdownDate - now;
@@ -197,41 +301,31 @@
             document.getElementById("minutes").innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
             document.getElementById("seconds").innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
         }, 1000);
-
-        // --- LÓGICA DO GRÁFICO E FORMULÁRIO ---
         async function updateStats() {
             try {
                 const response = await fetch('/stats');
                 const stats = await response.json();
-                
                 const boyVotes = stats.boy;
                 const girlVotes = stats.girl;
                 const totalVotes = boyVotes + girlVotes;
-
                 const boyPercentage = totalVotes > 0 ? Math.round((boyVotes / totalVotes) * 100) : 0;
                 const girlPercentage = totalVotes > 0 ? 100 - boyPercentage : 0;
-
                 document.getElementById('boy-votes').textContent = boyVotes;
                 document.getElementById('girl-votes').textContent = girlVotes;
-
                 document.getElementById('boy-bar').style.width = `${boyPercentage}%`;
                 document.getElementById('boy-percentage').textContent = `${boyPercentage}%`;
-                
                 document.getElementById('girl-bar').style.width = `${girlPercentage}%`;
                 document.getElementById('girl-percentage').textContent = `${girlPercentage}%`;
-
             } catch (error) {
                 console.error("Erro ao atualizar estatísticas:", error);
             }
         }
-
         document.getElementById('guest-form').addEventListener('submit', async function(event) {
             event.preventDefault();
             const feedback = document.getElementById('form-feedback');
             feedback.textContent = 'Enviando...';
             feedback.className = 'mt-4 text-center font-bold text-blue-500';
             const formData = new FormData(this);
-            
             try {
                 const response = await fetch('/submit', { method: 'POST', body: formData });
                 if (response.ok) {
@@ -248,42 +342,24 @@
                 feedback.className = 'mt-4 text-center font-bold text-red-500';
             }
         });
-
-        // --- LÓGICA DO CARROSSEL DE MENSAGENS (CORRIGIDO) ---
         let slider = null;
         async function updateMessages() {
             const carouselContainer = document.getElementById('message-carousel');
             try {
                 const response = await fetch('/messages');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const messages = await response.json();
-
-                if (slider) {
-                    slider.destroy();
-                    slider = null;
-                }
-
+                if (slider) slider.destroy();
                 carouselContainer.innerHTML = ''; 
-                
                 if (!messages || messages.length === 0) {
                     carouselContainer.innerHTML = '<p class="text-gray-500">Ainda não há mensagens. Seja o primeiro!</p>';
                     return;
                 }
-
                 messages.forEach(msg => {
                     const slide = document.createElement('div');
-                    // CORREÇÃO: Removido o 'mx-2' do card para usar o 'gutter' do slider
-                    slide.innerHTML = `
-                        <div class="message-card">
-                            <p class="text-gray-600 italic">"${msg.message || '...'}"</p>
-                            <p class="font-bold text-pink-400 mt-4">- ${msg.name || 'Anônimo'}</p>
-                        </div>
-                    `;
+                    slide.innerHTML = `<div class="message-card"><p class="text-gray-600 italic">"${msg.message || '...'}"</p><p class="font-bold text-pink-400 mt-4">- ${msg.name || 'Anônimo'}</p></div>`;
                     carouselContainer.appendChild(slide);
                 });
-
                 if (typeof tns === 'function' && carouselContainer.children.length > 0) {
                     slider = tns({
                         container: carouselContainer,
@@ -291,15 +367,12 @@
                         slideBy: 'page',
                         mouseDrag: true,
                         autoplay: true,
-                        autoplayTimeout: 4000, // CORREÇÃO: Adicionado tempo explícito para o autoplay
+                        autoplayTimeout: 4000,
                         autoplayButtonOutput: false,
                         controls: false,
                         nav: true,
-                        gutter: 16, // CORREÇÃO: Adicionada opção de espaçamento
-                        responsive: {
-                            768: { items: 2 },
-                            1024: { items: 3 }
-                        }
+                        gutter: 16,
+                        responsive: { 768: { items: 2 }, 1024: { items: 3 } }
                     });
                 }
             } catch (error) {
@@ -307,8 +380,6 @@
                 carouselContainer.innerHTML = '<p class="text-red-500">Não foi possível carregar as mensagens.</p>';
             }
         }
-
-        // Carrega os dados iniciais quando a página carrega
         window.onload = () => {
             updateStats();
             updateMessages();

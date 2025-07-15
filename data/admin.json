@@ -1,5 +1,6 @@
 {
   "username": "admin",
   "password": "segredo123",
-  "firstLogin": true
+  "firstLogin": true,
+  "livePassword": "live123" 
 }
