@@ -137,7 +137,7 @@
         let peerConnection;
         let broadcasterId; // **NOVO**: Guarda o ID do transmissor
         let myChatName = null;
-        const ws = new WebSocket(`ws://${window.location.host}`);
+        const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`);
         const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
         function addLiveChatMessage(sender, text) {
