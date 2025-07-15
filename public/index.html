@@ -216,7 +216,7 @@
                         const answer = await peerConnection.createAnswer();
                         await peerConnection.setLocalDescription(answer);
                         // Envia a resposta de volta para o transmissor
-                        ws.send(JSON.stringify({ type: 'answer', sdp: peerConnection.localDescription }));
+                        ws.send(JSON.stringify({ type: 'answer', sdp: peerConnection.localDescription, toId: broadcasterId }));
                     } catch (e) {
                          console.error("Falha ao criar ou definir a resposta:", e);
                     }
