@@ -182,7 +182,8 @@
                         <div id="live-chat-box"
                             class="h-32 bg-gray-100 rounded p-2 overflow-y-auto mb-2 border border-gray-300"></div>
                         <form id="join-chat-form" class="flex gap-2">
-                            <input type="text" id="chat-name" placeholder="Digite seu nome para interagir com os papais..."
+                            <input type="text" id="chat-name"
+                                placeholder="Digite seu nome para interagir com os papais..."
                                 class="flex-grow px-2 py-1 border rounded" required>
                             <button type="submit"
                                 class="bg-gray-500 text-white px-4 rounded hover:bg-gray-600">Entrar</button>
@@ -302,12 +303,18 @@
     </div>
 
     <div id="reveal-container"
-        class="reveal-container fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+        class="reveal-container fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none bg-black bg-opacity-50">
         <div id="reveal-card"
-            class="text-center p-10 rounded-2xl shadow-2xl transform scale-90 transition-all duration-500">
-            <h2 id="reveal-title" class="font-dancing text-6xl md:text-8xl"></h2>
+            class="text-center p-10 rounded-2xl shadow-2xl transform scale-90 transition-all duration-500 bg-white max-w-lg mx-4 relative">
+            <h2 id="reveal-title" class="font-dancing text-6xl md:text-8xl mb-4"></h2>
             <p class="mt-4 text-2xl md:text-4xl font-bold">É um...</p>
             <p id="reveal-result" class="text-7xl md:text-9xl font-bold mt-2"></p>
+
+            <button id="close-reveal-btn"
+                class="absolute top-4 right-4 bg-pink-400 text-white px-4 py-2 rounded-full font-semibold shadow-lg hover:bg-pink-500 transition"
+                aria-label="Fechar modal parabenizando os papais">
+                🎉 Parabéns papais! Fechar
+            </button>
         </div>
     </div>
 
@@ -515,6 +522,8 @@
             const revealCard = document.getElementById('reveal-card');
             const revealTitle = document.getElementById('reveal-title');
             const revealResult = document.getElementById('reveal-result');
+            const closeRevealBtn = document.getElementById('close-reveal-btn');
+
             if (result === 'boy') {
                 revealCard.className += ' bg-blue-400 text-white';
                 revealTitle.textContent = 'Bem-vindo, nosso príncipe!';
@@ -530,7 +539,19 @@
                 revealCard.classList.remove('scale-90');
             }, 100);
         }
-        const countdownDate = new Date("July 15, 2025 11:50:00").getTime(); // Lembre-se de ajustar esta data!
+        closeRevealBtn.addEventListener('click', () => {
+            revealContainer.classList.add('opacity-0', 'pointer-events-none');
+            mainContent.classList.remove('content-blur');
+            revealCard.classList.add('scale-90');
+
+            // Opcional: limpar conteúdo após fechar (se quiser)
+            setTimeout(() => {
+                revealCard.classList.remove('bg-blue-400', 'bg-pink-400', 'text-white');
+                document.getElementById('reveal-title').textContent = '';
+                document.getElementById('reveal-result').textContent = '';
+            }, 300);
+        });
+        const countdownDate = new Date("July 15, 2025 11:56:00").getTime(); // Lembre-se de ajustar esta data!
         const timerInterval = setInterval(() => {
             const now = new Date().getTime();
             const distance = countdownDate - now;
