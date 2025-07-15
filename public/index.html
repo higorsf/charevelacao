@@ -81,6 +81,32 @@
             font-family: 'Dancing Script', cursive;
             font-size: 1.25rem;
         }
+
+        .baby-theme-btn {
+            background: linear-gradient(135deg, #90cdf4 0%, #fbb6ce 100%);
+            color: white;
+            font-family: 'Dancing Script', cursive;
+            font-weight: 700;
+            font-size: 1.25rem;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 2rem;
+            box-shadow: 0 8px 15px rgba(251, 182, 206, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            user-select: none;
+            filter: drop-shadow(0 2px 2px rgba(255, 255, 255, 0.7));
+        }
+
+        .baby-theme-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 25px rgba(251, 182, 206, 0.5);
+        }
+
+        .baby-theme-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 6px 12px rgba(251, 182, 206, 0.2);
+        }
     </style>
 </head>
 
@@ -127,7 +153,12 @@
                     </h2>
                     <div class="relative w-full bg-black rounded-lg">
                         <video id="remoteVideo" autoplay playsinline muted class="w-full rounded-lg"></video>
-                        <button id="play-audio-btn" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Ativar Áudio</button>
+                        <div class="flex justify-center mt-4">
+                            <button id="start-audio-btn" class="baby-theme-btn" type="button"
+                                aria-label="Ativar áudio da live">
+                                ▶️ Ouvir com Som
+                            </button>
+                        </div>
                         <div id="live-status"
                             class="absolute top-2 left-2 bg-yellow-500 text-white text-sm font-bold px-2 py-1 rounded">●
                             A AGUARDAR...</div>
@@ -274,11 +305,18 @@
         const chatMessageInput = document.getElementById('chat-message');
         const chatError = document.getElementById('chat-error');
 
+
+        const startAudioBtn = document.getElementById('start-audio-btn');
         
-        const btnPlayAudio = document.getElementById('play-audio-btn');
-        btnPlayAudio.addEventListener('click', () => {
-            remoteVideo.muted = false;    // libera o áudio
-            remoteVideo.play();           // tenta tocar o vídeo com áudio
+
+        startAudioBtn.addEventListener('click', async () => {
+        try {
+            remoteVideo.muted = false; // tira o mute
+            await remoteVideo.play();
+            startAudioBtn.style.display = 'none'; // esconde o botão após ativar áudio
+        } catch (err) {
+            console.error('Não foi possível ativar o áudio:', err);
+        }
         });
 
         let peerConnection;
@@ -433,7 +471,7 @@
                 revealCard.classList.remove('scale-90');
             }, 100);
         }
-        const countdownDate = new Date("July 20, 2025 18:00:00").getTime(); // Lembre-se de ajustar esta data!
+        const countdownDate = new Date("July 19, 2025 19:00:00").getTime(); // Lembre-se de ajustar esta data!
         const timerInterval = setInterval(() => {
             const now = new Date().getTime();
             const distance = countdownDate - now;
