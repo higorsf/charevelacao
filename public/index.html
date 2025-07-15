@@ -127,6 +127,7 @@
                     </h2>
                     <div class="relative w-full bg-black rounded-lg">
                         <video id="remoteVideo" autoplay playsinline muted class="w-full rounded-lg"></video>
+                        <button id="play-audio-btn" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Ativar Áudio</button>
                         <div id="live-status"
                             class="absolute top-2 left-2 bg-yellow-500 text-white text-sm font-bold px-2 py-1 rounded">●
                             A AGUARDAR...</div>
@@ -272,6 +273,13 @@
         const chatNameInput = document.getElementById('chat-name');
         const chatMessageInput = document.getElementById('chat-message');
         const chatError = document.getElementById('chat-error');
+
+        
+        const btnPlayAudio = document.getElementById('play-audio-btn');
+        btnPlayAudio.addEventListener('click', () => {
+            remoteVideo.muted = false;    // libera o áudio
+            remoteVideo.play();           // tenta tocar o vídeo com áudio
+        });
 
         let peerConnection;
         let broadcasterId; // **NOVO**: Guarda o ID do transmissor
