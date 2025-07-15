@@ -87,25 +87,34 @@
             color: white;
             font-family: 'Dancing Script', cursive;
             font-weight: 700;
-            font-size: 1.25rem;
-            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
             border: none;
             border-radius: 2rem;
-            box-shadow: 0 8px 15px rgba(251, 182, 206, 0.3);
+            box-shadow: 0 6px 12px rgba(251, 182, 206, 0.3);
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.3s ease;
             user-select: none;
             filter: drop-shadow(0 2px 2px rgba(255, 255, 255, 0.7));
+            white-space: nowrap;
         }
 
         .baby-theme-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 12px 25px rgba(251, 182, 206, 0.5);
+            box-shadow: 0 10px 20px rgba(251, 182, 206, 0.5);
         }
 
         .baby-theme-btn:active {
             transform: scale(0.95);
-            box-shadow: 0 6px 12px rgba(251, 182, 206, 0.2);
+            box-shadow: 0 5px 10px rgba(251, 182, 206, 0.2);
+        }
+
+        .volume-slider {
+            width: 120px;
+            cursor: pointer;
+            accent-color: #fbb6ce;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #90cdf4 0%, #fbb6ce 100%);
         }
     </style>
 </head>
@@ -151,18 +160,24 @@
                     class="live-box p-6 rounded-2xl shadow-2xl w-full max-w-xl lg:w-auto lg:flex-1 hidden">
                     <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">A nossa reação AO VIVO! 🎥
                     </h2>
-                    <div class="relative w-full bg-black rounded-lg">
-                        <video id="remoteVideo" autoplay playsinline muted class="w-full rounded-lg"></video>
-                        <div class="flex justify-center mt-4">
-                            <button id="start-audio-btn" class="baby-theme-btn" type="button"
-                                aria-label="Ativar áudio da live">
-                                ▶️ Ouvir com Som
-                            </button>
-                        </div>
+                    <div class="relative w-full bg-black rounded-lg overflow-hidden">
+                        <video id="remoteVideo" autoplay playsinline muted class="w-full rounded-lg bg-black"></video>
                         <div id="live-status"
                             class="absolute top-2 left-2 bg-yellow-500 text-white text-sm font-bold px-2 py-1 rounded">●
                             A AGUARDAR...</div>
                     </div>
+
+                    <div class="flex justify-center items-center gap-4 mt-4">
+                        <button id="start-audio-btn" class="baby-theme-btn" type="button"
+                            aria-label="Ativar áudio da live">
+                            ▶️ Ouvir com Som
+                        </button>
+                        <label for="volume-slider" class="sr-only">Controle de volume</label>
+                        <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0"
+                            class="volume-slider" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"
+                            aria-label="Controle de volume">
+                    </div>
+
                     <div class="mt-4">
                         <div id="live-chat-box"
                             class="h-32 bg-gray-100 rounded p-2 overflow-y-auto mb-2 border border-gray-300"></div>
@@ -189,16 +204,12 @@
                 <h2 class="font-dancing text-5xl text-pink-400 mb-12">Nossa Jornada de Amor</h2>
                 <div class="grid md:grid-cols-2 gap-10 text-left">
                     <div class="bg-blue-50 p-8 rounded-2xl shadow-lg">
-                        <h3 class="text-2xl font-bold text-blue-500 mb-4">A Chegada da Alice</h3>
-                        <p class="text-gray-600 leading-relaxed">A nossa jornada como pais começou com a chegada da
-                            nossa pequena Alice, que transformou nosso mundo e encheu nossos dias com risadas e um amor
-                            sem fim.</p>
+                        <h3 class="text-2xl font-bold text-blue-500 mb-4">A Chegada da Liz</h3>
+                        <p class="text-gray-600 leading-relaxed">A chegada da Liz foi rápida e avassaladora. Ela tomou nossos corações no instante em que veio ao mundo. Com ela, aprendemos, crescemos e descobrimos um amor que não sabíamos que existia. Liz foi o nosso primeiro grande amor — e agora, com o coração transbordando, nos preparamos para viver tudo isso de novo. Porque o amor não se divide… ele se multiplica.</p>
                     </div>
                     <div class="bg-pink-50 p-8 rounded-2xl shadow-lg">
                         <h3 class="text-2xl font-bold text-pink-500 mb-4">E a Aventura Continua...</h3>
-                        <p class="text-gray-600 leading-relaxed">Agora, nossos corações transbordam novamente com a
-                            notícia de que a família vai crescer! Uma nova luz está a caminho para se juntar à Alice e a
-                            nós.</p>
+                        <p class="text-gray-600 leading-relaxed">Estamos prestes a viver, mais uma vez, o milagre da vida. A espera, os sonhos, os planos… tudo volta com uma nova força, um novo brilho. Ser pai novamente é sentir o amor se multiplicar antes mesmo de ver o rostinho. É saber que, mesmo já conhecendo o caminho, cada passo será único..</p>
                     </div>
                 </div>
             </div>
@@ -279,7 +290,7 @@
             </div>
         </section>
         <footer class="text-center py-8 bg-white mt-12">
-            <p class="font-dancing text-2xl text-gray-700">Com amor, [Seu Nome] & [Nome da Esposa]</p>
+            <p class="font-dancing text-2xl text-gray-700">Com amor, Alyne & Higor</p>
         </footer>
     </div>
 
@@ -307,16 +318,30 @@
 
 
         const startAudioBtn = document.getElementById('start-audio-btn');
-        
+        const volumeSlider = document.getElementById('volume-slider');
+
+        // Inicialmente vídeo mudo, volume slider começa em 0
+        remoteVideo.muted = true;
+
 
         startAudioBtn.addEventListener('click', async () => {
-        try {
-            remoteVideo.muted = false; // tira o mute
-            await remoteVideo.play();
-            startAudioBtn.style.display = 'none'; // esconde o botão após ativar áudio
-        } catch (err) {
-            console.error('Não foi possível ativar o áudio:', err);
-        }
+            try {
+                remoteVideo.muted = false;
+                remoteVideo.volume = 0.5;  // volume inicial médio
+                volumeSlider.value = 0.5;
+                await remoteVideo.play();
+                startAudioBtn.style.display = 'none'; // esconde botão após ativar áudio
+            } catch (err) {
+                console.error('Não foi possível ativar o áudio:', err);
+            }
+        });
+        volumeSlider.addEventListener('input', () => {
+            remoteVideo.volume = volumeSlider.value;
+            if (remoteVideo.volume === 0) {
+                remoteVideo.muted = true;
+            } else {
+                remoteVideo.muted = false;
+            }
         });
 
         let peerConnection;
