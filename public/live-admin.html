@@ -1,262 +1,339 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8" />
-<title>Transmitir Ao Vivo</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
-<style>
-  .font-dancing { font-family: 'Dancing Script', cursive; }
-  .chat-message strong { font-family: 'Dancing Script', cursive; font-size: 1.25rem; }
-</style>
+    <meta charset="UTF-8" />
+    <title>Transmitir Ao Vivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Dancing+Script:wght@700&display=swap"
+        rel="stylesheet" />
+    <style>
+        .font-dancing {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .chat-message strong {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.25rem;
+        }
+    </style>
 </head>
+
 <body class="bg-gray-100 flex flex-col items-center justify-center h-screen p-4">
 
-<!-- Modal senha -->
-<div id="password-modal" class="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
-  <div class="bg-white p-8 rounded-lg shadow-2xl max-w-sm w-full">
-    <h2 class="text-2xl font-bold mb-4">Acesso à Transmissão</h2>
-    <p class="mb-4">Por favor, insira a senha da live para continuar.</p>
-    <form id="password-form">
-      <input type="password" id="live-password" class="w-full px-3 py-2 border rounded-lg mb-4" placeholder="Senha da live" required />
-      <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Entrar</button>
-      <p id="password-error" class="text-red-500 text-sm text-center mt-2"></p>
-    </form>
-  </div>
-</div>
-
-<!-- Conteúdo principal -->
-<div id="main-content" class="hidden w-full h-full flex flex-col items-center justify-center max-w-5xl">
-  <h1 class="text-3xl font-bold mb-4">Página de Transmissão</h1>
-  <div class="w-full flex flex-col md:flex-row gap-4">
-    <div class="flex-grow">
-      <p class="mb-2 text-center">Sua câmera será compartilhada com os convidados.</p>
-      <div class="relative w-full bg-black rounded-lg shadow-lg">
-        <video id="localVideo" autoplay muted playsinline class="w-full rounded-lg bg-black"></video>
-        <div id="status" class="absolute top-2 left-2 bg-red-500 text-white text-sm font-bold px-2 py-1 rounded">● OFFLINE</div>
-      </div>
-      <div id="controls" class="mt-4 flex gap-4 hidden justify-center">
-        <button id="toggleVideoButton" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Pausar Vídeo e Áudio</button>
-        <button id="endButton" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Encerrar Live</button>
-      </div>
-      <button id="startButton" class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Iniciar Transmissão</button>
+    <!-- Modal senha -->
+    <div id="password-modal" class="absolute inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-2xl max-w-sm w-full">
+            <h2 class="text-2xl font-bold mb-4">Acesso à Transmissão</h2>
+            <p class="mb-4">Por favor, insira a senha da live para continuar.</p>
+            <form id="password-form">
+                <input type="password" id="live-password" class="w-full px-3 py-2 border rounded-lg mb-4"
+                    placeholder="Senha da live" required />
+                <button type="submit"
+                    class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Entrar</button>
+                <p id="password-error" class="text-red-500 text-sm text-center mt-2"></p>
+            </form>
+        </div>
     </div>
 
-    <div class="w-full md:w-80 bg-gray-200 p-4 rounded-lg shadow-lg flex flex-col border border-gray-300">
-      <h2 class="text-xl font-bold mb-2 text-center text-gray-700 font-dancing">Chat Ao Vivo</h2>
-      <div id="chat-box" class="flex-grow bg-white rounded p-2 overflow-y-auto h-64 md:h-auto"></div>
+    <!-- Conteúdo principal -->
+    <div id="main-content" class="hidden w-full h-full flex flex-col items-center justify-center max-w-5xl">
+        <h1 class="text-3xl font-bold mb-4">Página de Transmissão</h1>
+        <p id="viewer-counter" class="text-sm text-gray-500 mt-2 text-center">👀 0 pessoas online</p>
+        <div class="w-full flex flex-col md:flex-row gap-4">
+            <div class="flex-grow">
+                <p class="mb-2 text-center">Sua câmera será compartilhada com os convidados.</p>
+                <div class="relative w-full bg-black rounded-lg shadow-lg">
+                    <video id="localVideo" autoplay muted playsinline class="w-full rounded-lg bg-black"></video>
+                    <div id="status"
+                        class="absolute top-2 left-2 bg-red-500 text-white text-sm font-bold px-2 py-1 rounded">●
+                        OFFLINE</div>
+                </div>
+                <div id="controls" class="mt-4 flex gap-4 hidden justify-center">
+                    <button id="toggleVideoButton"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">Pausar Vídeo e
+                        Áudio</button>
+                    <button id="endButton"
+                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Encerrar
+                        Live</button>
+                </div>
+                <button id="startButton"
+                    class="mt-4 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Iniciar
+                    Transmissão</button>
+            </div>
+
+            <div class="w-full md:w-80 bg-gray-200 p-4 rounded-lg shadow-lg flex flex-col border border-gray-300">
+                <h2 class="text-xl font-bold mb-2 text-center text-gray-700 font-dancing">Chat Ao Vivo</h2>
+                <div id="chat-box" class="flex-grow bg-white rounded p-2 overflow-y-auto h-64 md:h-auto"></div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-  let ws;
-  let localStream;
-  const peerConnections = {}; // peerConnections para watchers
-  const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    <script>
+        let ws;
+        let localStream;
+        const peerConnections = {}; // peerConnections para watchers
+        const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-  const passwordModal = document.getElementById('password-modal');
-  const passwordForm = document.getElementById('password-form');
-  const passwordInput = document.getElementById('live-password');
-  const passwordError = document.getElementById('password-error');
-  const mainContent = document.getElementById('main-content');
-  const startButton = document.getElementById('startButton');
-  const controlsDiv = document.getElementById('controls');
-  const toggleVideoButton = document.getElementById('toggleVideoButton');
-  const endButton = document.getElementById('endButton');
-  const localVideo = document.getElementById('localVideo');
-  const statusDiv = document.getElementById('status');
-  const chatBox = document.getElementById('chat-box');
+        const passwordModal = document.getElementById('password-modal');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('live-password');
+        const passwordError = document.getElementById('password-error');
+        const mainContent = document.getElementById('main-content');
+        const startButton = document.getElementById('startButton');
+        const controlsDiv = document.getElementById('controls');
+        const toggleVideoButton = document.getElementById('toggleVideoButton');
+        const endButton = document.getElementById('endButton');
+        const localVideo = document.getElementById('localVideo');
+        const statusDiv = document.getElementById('status');
+        const chatBox = document.getElementById('chat-box');
+        const connectedUsers = new Set();
+        const chatParticipants = new Set();
 
-  passwordForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    passwordError.textContent = '';
+        
 
-    try {
-      const res = await fetch('/verify-live-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput.value.trim() }),
-      });
-      if (res.ok) {
-        passwordModal.classList.add('hidden');
-        mainContent.classList.remove('hidden');
-        initializeWebSocket();
-      } else {
-        const data = await res.json();
-        passwordError.textContent = data.message || 'Senha incorreta.';
-      }
-    } catch (err) {
-      passwordError.textContent = 'Erro de conexão com o servidor.';
-      console.error(err);
-    }
-  });
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            passwordError.textContent = '';
 
-  function initializeWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    ws = new WebSocket(`${protocol}://${window.location.host}`);
-
-    ws.onopen = () => {
-      console.log('WebSocket aberto');
-      ws.send(JSON.stringify({ type: 'broadcaster' }));
-    };
-
-    ws.onmessage = async (event) => {
-      const message = JSON.parse(event.data);
-      switch (message.type) {
-        case 'chat':
-          addChatMessage(message.sender, message.text);
-          break;
-
-        case 'watcher': {
-          const watcherId = message.id;
-          if (peerConnections[watcherId]) return; // já existe conexão
-
-          const pc = new RTCPeerConnection(configuration);
-          peerConnections[watcherId] = pc;
-
-          // Adiciona tracks do localStream para o watcher
-          if (localStream) {
-            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-          }
-
-          pc.onicecandidate = (event) => {
-            if (event.candidate) {
-              ws.send(JSON.stringify({
-                type: 'iceCandidate',
-                candidate: event.candidate,
-                toId: watcherId
-              }));
+            try {
+                const res = await fetch('/verify-live-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: passwordInput.value.trim() }),
+                });
+                if (res.ok) {
+                    passwordModal.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    initializeWebSocket();
+                } else {
+                    const data = await res.json();
+                    passwordError.textContent = data.message || 'Senha incorreta.';
+                }
+            } catch (err) {
+                passwordError.textContent = 'Erro de conexão com o servidor.';
+                console.error(err);
             }
-          };
-
-          // Cria offer e envia para watcher
-          try {
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            ws.send(JSON.stringify({
-              type: 'offer',
-              sdp: offer,
-              toId: watcherId
-            }));
-          } catch (err) {
-            console.error('Erro ao criar offer para watcher:', err);
-          }
-          break;
+        });
+        function broadcast(data) {
+            const msg = JSON.stringify(data);
+            connectedUsers.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(msg);
+                }
+            });
         }
 
-        case 'answer': {
-          const watcherId = message.fromId;
-          const pc = peerConnections[watcherId];
-          if (!pc) return;
-          await pc.setRemoteDescription(new RTCSessionDescription(message.sdp));
-          break;
+        function broadcastViewerCount() {
+            broadcast({ type: 'viewer-count', count: connectedUsers.size });
         }
 
-        case 'iceCandidate': {
-          const watcherId = message.fromId;
-          const pc = peerConnections[watcherId];
-          if (!pc) return;
-          try {
-            await pc.addIceCandidate(new RTCIceCandidate(message.candidate));
-          } catch (err) {
-            console.error('Erro ao adicionar ICE candidate:', err);
-          }
-          break;
+        function initializeWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            ws = new WebSocket(`${protocol}://${window.location.host}`);
+
+            ws.onopen = () => {
+                console.log('WebSocket aberto');
+                ws.send(JSON.stringify({ type: 'broadcaster' }));
+            };
+
+            ws.onmessage = async (event) => {
+                const message = JSON.parse(event.data);
+                if (message.type === 'viewer-count') {
+                    viewerCounter.textContent = `👀 ${message.count} pessoa${message.count !== 1 ? 's' : ''} online`;
+                }
+                switch (message.type) {
+                    case 'chat':
+                        addChatMessage(message.sender, message.text);
+                        break;
+
+                    case 'watcher': {
+                        const watcherId = message.id;
+                        if (peerConnections[watcherId]) return; // já existe conexão
+
+                        const pc = new RTCPeerConnection(configuration);
+                        peerConnections[watcherId] = pc;
+
+                        // Adiciona tracks do localStream para o watcher
+                        if (localStream) {
+                            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                        }
+
+                        pc.onicecandidate = (event) => {
+                            if (event.candidate) {
+                                ws.send(JSON.stringify({
+                                    type: 'iceCandidate',
+                                    candidate: event.candidate,
+                                    toId: watcherId
+                                }));
+                            }
+                        };
+
+                        // Cria offer e envia para watcher
+                        try {
+                            const offer = await pc.createOffer();
+                            await pc.setLocalDescription(offer);
+                            ws.send(JSON.stringify({
+                                type: 'offer',
+                                sdp: offer,
+                                toId: watcherId
+                            }));
+                        } catch (err) {
+                            console.error('Erro ao criar offer para watcher:', err);
+                        }
+                        break;
+                    }
+
+                    case 'answer': {
+                        const watcherId = message.fromId;
+                        const pc = peerConnections[watcherId];
+                        if (!pc) return;
+                        await pc.setRemoteDescription(new RTCSessionDescription(message.sdp));
+                        break;
+                    }
+
+                    case 'iceCandidate': {
+                        const watcherId = message.fromId;
+                        const pc = peerConnections[watcherId];
+                        if (!pc) return;
+                        try {
+                            await pc.addIceCandidate(new RTCIceCandidate(message.candidate));
+                        } catch (err) {
+                            console.error('Erro ao adicionar ICE candidate:', err);
+                        }
+                        break;
+                    }
+
+                    case 'watcher-disconnected': {
+                        const watcherId = message.id;
+                        const pc = peerConnections[watcherId];
+                        if (pc) {
+                            pc.close();
+                            delete peerConnections[watcherId];
+                        }
+                        break;
+                    }
+
+                    case 'end-live': {
+                        alert('A live foi encerrada pelo transmissor.');
+                        stopLive();
+                        break;
+                    }
+                }
+            };
+            
+            ws.on('connection', (ws) => {
+            connectedUsers.add(ws);
+
+            ws.on('message', (message) => {
+                const data = JSON.parse(message);
+
+                if (data.type === 'join') {
+                    chatParticipants.add(data.name);
+
+                    // 🔴 Salvar no arquivo (sem duplicar)
+                    const fs = require('fs');
+                    const logPath = './chat_participants.txt';
+                    const content = `${data.name}\n`;
+
+                    fs.readFile(logPath, 'utf8', (err, existing) => {
+                        if (!existing.includes(data.name)) {
+                            fs.appendFile(logPath, content, () => {});
+                        }
+                    });
+
+                    // Envia confirmação
+                    ws.send(JSON.stringify({ type: 'join-success' }));
+                    // Atualiza todos com a nova contagem
+                    broadcastViewerCount();
+                }
+
+                if (data.type === 'chat') {
+                    broadcast({ type: 'chat', sender: data.name, text: data.text });
+                }
+            });
+
+            ws.on('close', () => {
+                connectedUsers.delete(ws);
+                broadcastViewerCount();
+            });
+        });
+            ws.onerror = (err) => console.error('WebSocket erro:', err);
+            ws.onclose = () => console.log('WebSocket fechado');
         }
 
-        case 'watcher-disconnected': {
-          const watcherId = message.id;
-          const pc = peerConnections[watcherId];
-          if (pc) {
-            pc.close();
-            delete peerConnections[watcherId];
-          }
-          break;
+        startButton.onclick = async () => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('WebSocket ainda não conectado. Aguarde e tente novamente.');
+                return;
+            }
+
+            try {
+                statusDiv.textContent = '● A INICIAR...';
+                statusDiv.classList.replace('bg-red-500', 'bg-yellow-500');
+
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+
+                // Atualiza todas as conexões atuais (se houver)
+                Object.entries(peerConnections).forEach(async ([id, pc]) => {
+                    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    ws.send(JSON.stringify({ type: 'offer', sdp: offer, toId: id }));
+                });
+
+                statusDiv.textContent = '● AO VIVO';
+                statusDiv.classList.replace('bg-yellow-500', 'bg-green-500');
+                controlsDiv.classList.remove('hidden');
+                startButton.classList.add('hidden');
+            } catch (err) {
+                alert('Não foi possível acessar câmera/microfone. Verifique permissões.');
+                statusDiv.textContent = '● FALHA';
+                statusDiv.classList.replace('bg-yellow-500', 'bg-red-500');
+                console.error('Erro getUserMedia:', err);
+            }
+        };
+
+        toggleVideoButton.onclick = () => {
+            if (!localStream) return;
+            const enabled = localStream.getVideoTracks()[0].enabled;
+            localStream.getTracks().forEach(track => track.enabled = !enabled);
+            toggleVideoButton.textContent = enabled ? 'Retomar Vídeo e Áudio' : 'Pausar Vídeo e Áudio';
+        };
+
+        endButton.onclick = () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'end-live' }));
+            }
+            stopLive();
+        };
+
+        function stopLive() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+                localVideo.srcObject = null;
+            }
+            Object.values(peerConnections).forEach(pc => pc.close());
+            for (const id in peerConnections) delete peerConnections[id];
+
+            statusDiv.textContent = '● ENCERRADA';
+            statusDiv.classList.replace('bg-green-500', 'bg-red-500');
+            controlsDiv.classList.add('hidden');
+            startButton.classList.remove('hidden');
         }
 
-        case 'end-live': {
-          alert('A live foi encerrada pelo transmissor.');
-          stopLive();
-          break;
+        function addChatMessage(sender, text) {
+            const p = document.createElement('p');
+            p.className = 'chat-message mb-1';
+            p.innerHTML = `<strong class="text-gray-600">${sender}:</strong> ${text}`;
+            chatBox.appendChild(p);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
-      }
-    };
-
-    ws.onerror = (err) => console.error('WebSocket erro:', err);
-    ws.onclose = () => console.log('WebSocket fechado');
-  }
-
-  startButton.onclick = async () => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      alert('WebSocket ainda não conectado. Aguarde e tente novamente.');
-      return;
-    }
-
-    try {
-      statusDiv.textContent = '● A INICIAR...';
-      statusDiv.classList.replace('bg-red-500', 'bg-yellow-500');
-
-      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localVideo.srcObject = localStream;
-
-      // Atualiza todas as conexões atuais (se houver)
-      Object.entries(peerConnections).forEach(async ([id, pc]) => {
-        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        ws.send(JSON.stringify({ type: 'offer', sdp: offer, toId: id }));
-      });
-
-      statusDiv.textContent = '● AO VIVO';
-      statusDiv.classList.replace('bg-yellow-500', 'bg-green-500');
-      controlsDiv.classList.remove('hidden');
-      startButton.classList.add('hidden');
-    } catch (err) {
-      alert('Não foi possível acessar câmera/microfone. Verifique permissões.');
-      statusDiv.textContent = '● FALHA';
-      statusDiv.classList.replace('bg-yellow-500', 'bg-red-500');
-      console.error('Erro getUserMedia:', err);
-    }
-  };
-
-  toggleVideoButton.onclick = () => {
-    if (!localStream) return;
-    const enabled = localStream.getVideoTracks()[0].enabled;
-    localStream.getTracks().forEach(track => track.enabled = !enabled);
-    toggleVideoButton.textContent = enabled ? 'Retomar Vídeo e Áudio' : 'Pausar Vídeo e Áudio';
-  };
-
-  endButton.onclick = () => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type: 'end-live' }));
-    }
-    stopLive();
-  };
-
-  function stopLive() {
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-      localStream = null;
-      localVideo.srcObject = null;
-    }
-    Object.values(peerConnections).forEach(pc => pc.close());
-    for (const id in peerConnections) delete peerConnections[id];
-
-    statusDiv.textContent = '● ENCERRADA';
-    statusDiv.classList.replace('bg-green-500', 'bg-red-500');
-    controlsDiv.classList.add('hidden');
-    startButton.classList.remove('hidden');
-  }
-
-  function addChatMessage(sender, text) {
-    const p = document.createElement('p');
-    p.className = 'chat-message mb-1';
-    p.innerHTML = `<strong class="text-gray-600">${sender}:</strong> ${text}`;
-    chatBox.appendChild(p);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-</script>
+    </script>
 
 </body>
+
 </html>
