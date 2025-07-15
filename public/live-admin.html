@@ -65,7 +65,6 @@
         let ws; 
         const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        // Lógica da Senha
         passwordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             passwordError.textContent = '';
@@ -102,49 +101,34 @@
                     case 'chat':
                         addChatMessage(message.sender, message.text);
                         break;
-                    
-                    // **CORREÇÃO**: Lógica para lidar com novos espectadores.
                     case 'watcher': {
-                        const watcherId = message.id; // Usar a propriedade 'id' correta
-                        console.log(`Novo espectador [${watcherId}] quer se conectar.`);
-
+                        const watcherId = message.id;
                         const peerConnection = new RTCPeerConnection(configuration);
                         peerConnections[watcherId] = peerConnection;
-
-                        // Adiciona as faixas de mídia se a stream já estiver ativa
                         if (localStream) {
                             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
                         }
-
                         peerConnection.onicecandidate = e => {
                             if (e.candidate) {
                                 ws.send(JSON.stringify({ type: 'iceCandidate', candidate: e.candidate, toId: watcherId }));
                             }
                         };
-                        
-                        // Cria e envia a oferta de conexão para o novo espectador
                         try {
                             const offer = await peerConnection.createOffer();
                             await peerConnection.setLocalDescription(offer);
                             ws.send(JSON.stringify({ type: 'offer', sdp: offer, toId: watcherId }));
-                            console.log(`Oferta enviada para o espectador [${watcherId}]`);
                         } catch (e) {
                             console.error("Erro ao criar oferta:", e);
                         }
                         break;
                     }
-
-                    // **CORREÇÃO**: Lógica para receber a resposta do espectador.
                     case 'answer': {
                         const watcherId = message.fromId;
                         if (peerConnections[watcherId]) {
-                            console.log(`Resposta recebida de [${watcherId}]`);
                             await peerConnections[watcherId].setRemoteDescription(new RTCSessionDescription(message.sdp));
                         }
                         break;
                     }
-
-                    // **CORREÇÃO**: Lógica para receber os ICE candidates do espectador.
                     case 'iceCandidate': {
                         const watcherId = message.fromId;
                         if (peerConnections[watcherId] && message.candidate) {
@@ -152,12 +136,9 @@
                         }
                         break;
                     }
-
-                    // **MELHORIA**: Lógica para limpar a conexão de um espectador que desconectou.
                     case 'watcher-disconnected': {
                         const watcherId = message.id;
                         if (peerConnections[watcherId]) {
-                            console.log(`Espectador [${watcherId}] desconectou. Fechando conexão.`);
                             peerConnections[watcherId].close();
                             delete peerConnections[watcherId];
                         }
@@ -179,17 +160,22 @@
         }
 
         startButton.onclick = async () => {
+            // **NOVA VERIFICAÇÃO**: Garante que a página está em um contexto seguro.
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Seu navegador não suporta acesso à câmera ou a página não está em um contexto seguro (use HTTPS ou localhost).");
+                console.error("navigator.mediaDevices.getUserMedia não está disponível.");
+                statusDiv.textContent = '● ERRO DE SEGURANÇA';
+                statusDiv.classList.add('bg-red-500');
+                return;
+            }
+
             startButton.classList.add('hidden');
             statusDiv.textContent = '● A INICIAR...';
             statusDiv.classList.replace('bg-red-500', 'bg-yellow-500');
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 localVideo.srcObject = localStream;
-
-                // **MELHORIA**: Se já houver espectadores esperando, adiciona as faixas de mídia
-                // e renegocia a conexão com eles agora que o vídeo está disponível.
                 Object.entries(peerConnections).forEach(async ([id, pc]) => {
-                    console.log(`Adicionando stream para o espectador pré-existente [${id}]`);
                     localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
                     const offer = await pc.createOffer();
                     await pc.setLocalDescription(offer);
@@ -201,8 +187,9 @@
                 controlsDiv.classList.remove('hidden');
             } catch(err) {
                 console.error("Erro ao iniciar a live:", err);
-                alert("Não foi possível aceder à câmara/microfone.");
+                alert("Não foi possível aceder à câmara/microfone. Verifique as permissões do navegador.");
                 statusDiv.textContent = '● FALHA';
+                statusDiv.classList.replace('bg-yellow-500', 'bg-red-500');
                 startButton.classList.remove('hidden');
             }
         };
