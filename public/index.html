@@ -418,7 +418,27 @@
                     chatSendBtn.disabled = false; // Permite tentar novamente
                     break;
                 case 'end-live':
-                    // ... (código original sem alterações) ...
+                    liveStatus.textContent = '● ENCERRADA';
+                    liveStatus.classList.remove('bg-green-500', 'bg-yellow-500');
+                    liveStatus.classList.add('bg-red-500');
+
+                    if (peerConnection) {s
+                        peerConnection.close();
+                        peerConnection = null;
+                    }
+
+                    // Para a reprodução de vídeo
+                    if (remoteVideo.srcObject) {
+                        remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+                        remoteVideo.srcObject = null;
+                    }
+
+                    // Esconde o container da live após 10 segundos para o usuário ver a mensagem
+                    setTimeout(() => {
+                        liveStreamContainer.classList.add('opacity-0', 'pointer-events-none');
+                    }, 10000);
+                    break;
+                    // --- FIM DA LÓGICA CORRIGIDA ---
                     break;
                 case 'offer':
                     broadcasterId = message.fromId;
@@ -450,7 +470,13 @@
                     }
                     break;
                 case 'iceCandidate':
-                    // ... (código original sem alterações) ...
+                    if (peerConnection && message.candidate) {
+                        try {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(message.candidate));
+                        } catch (e) {
+                            console.error('Erro ao adicionar ICE candidate recebido:', e);
+                        }
+                    }
                     break;
             }
         };
