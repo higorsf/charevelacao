@@ -28,6 +28,7 @@
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
             transition: all 0.5s ease-in-out;
+            /* 'all' já inclui 'opacity' */
         }
 
         .reveal-container {
@@ -422,24 +423,30 @@
                     liveStatus.classList.remove('bg-green-500', 'bg-yellow-500');
                     liveStatus.classList.add('bg-red-500');
 
-                    if (peerConnection) {s
+                    if (peerConnection) {
                         peerConnection.close();
                         peerConnection = null;
                     }
 
-                    // Para a reprodução de vídeo
                     if (remoteVideo.srcObject) {
                         remoteVideo.srcObject.getTracks().forEach(track => track.stop());
                         remoteVideo.srcObject = null;
                     }
 
-                    // Esconde o container da live após 10 segundos para o usuário ver a mensagem
+                    // --- LÓGICA DE DESAPARECIMENTO CORRIGIDA ---
+                    // Espera 10 segundos antes de começar a desaparecer
                     setTimeout(() => {
-                        liveStreamContainer.classList.add('opacity-0', 'pointer-events-none');
+                        // 1. Inicia a transição para deixar o elemento transparente
+                        liveStreamContainer.classList.add('opacity-0');
+
+                        // 2. Após a animação de 500ms (0.5s) terminar, adiciona 'hidden' para remover o espaço
+                        setTimeout(() => {
+                            liveStreamContainer.classList.add('hidden');
+                        }, 500); // Este tempo DEVE ser igual à duração da transição no CSS!
+
                     }, 10000);
                     break;
-                    // --- FIM DA LÓGICA CORRIGIDA ---
-                    break;
+                // --- FIM DA LÓGICA CORRIGIDA ---
                 case 'offer':
                     broadcasterId = message.fromId;
                     console.log(`Recebida oferta do transmissor [${broadcasterId}]`);
